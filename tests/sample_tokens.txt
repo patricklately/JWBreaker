@@ -1,0 +1,97 @@
+# JWBreaker Sample Tokens
+# One token per vulnerability class for testing each module.
+# Format: [label] on the line above each token.
+# Usage: python jwbreaker.py -t <token>
+# Note: alg_confusion test requires the public key in tests/alg_confusion_public.pem
+
+# ─────────────────────────────────────────────────────────────
+# 1. VALID TOKEN
+# A correctly signed HS256 token with all claims present.
+# Expected: no vulnerabilities found. Use as a baseline/sanity check.
+# Secret: v3ryStr0ngS3cr3tTh4tW0ntB3Cr4ck3d!
+# ─────────────────────────────────────────────────────────────
+[valid]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJpc3MiOiJqd2JyZWFrZXItdGVzdCIsImF1ZCI6Imp3YnJlYWtlci10ZXN0IiwiaWF0IjoxNzc2NzUyNTk3LCJleHAiOjE3NzY3NTYxOTd9.8BzpTb4EVmiPISnYU3WkFlZMTqNxxVNIjG623tlcD7w
+
+# ─────────────────────────────────────────────────────────────
+# 2. ALG:NONE BYPASS
+# Header algorithm set to "none", signature stripped entirely.
+# Expected: CRITICAL — alg:none vulnerability detected.
+# Module: alg_none.py
+# ─────────────────────────────────────────────────────────────
+[alg_none]
+eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6ImFkbWluIiwiaXNzIjoiandicmVha2VyLXRlc3QiLCJpYXQiOjE3NzY3NTI1OTcsImV4cCI6MTc3Njc1NjE5N30.
+
+# ─────────────────────────────────────────────────────────────
+# 3. WEAK HMAC SECRET
+# Signed with HS256 using the secret "secret".
+# Expected: HIGH — secret cracked via brute-force.
+# Module: brute_force.py (use with wordlists/common_secrets.txt)
+# ─────────────────────────────────────────────────────────────
+[weak_secret]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJpc3MiOiJqd2JyZWFrZXItdGVzdCIsImlhdCI6MTc3Njc1MjU5NywiZXhwIjoxNzc2NzU2MTk3fQ.ux4lxUL70_sdqL2rLXZBBXdYe6rNLqcIoyaBNL2457c
+
+# ─────────────────────────────────────────────────────────────
+# 4. EXPIRED TOKEN
+# exp claim set 1 hour in the past.
+# Expected: MEDIUM — token is expired.
+# Module: claim_analyser.py
+# ─────────────────────────────────────────────────────────────
+[expired]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJpc3MiOiJqd2JyZWFrZXItdGVzdCIsImlhdCI6MTc3Njc0NTM5NywiZXhwIjoxNzc2NzQ4OTk3fQ.v4Nn1gEsMdZSkOu_9JyGJrztLUMPs78F9QQK5usvRcs
+
+# ─────────────────────────────────────────────────────────────
+# 5. MISSING CLAIMS
+# No exp, iss, aud, iat claims present.
+# Expected: MEDIUM — multiple missing critical claims.
+# Module: claim_analyser.py
+# ─────────────────────────────────────────────────────────────
+[missing_claims]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIifQ.cryOoqeQ6wFJKTlxJYF39rRBhuQKyIZhGmS1iQMdpFo
+
+# ─────────────────────────────────────────────────────────────
+# 6. SENSITIVE DATA IN PAYLOAD
+# Payload contains an email address and an API key.
+# Expected: MEDIUM — PII and API key detected in unencrypted payload.
+# Module: sensitive_data.py
+# ─────────────────────────────────────────────────────────────
+[sensitive_data]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJlbWFpbCI6InBhdHJpY2tAZXhhbXBsZS5jb20iLCJhcGlfa2V5Ijoic2stYWJjMTIzZGVmNDU2Z2hpNzg5IiwiaWF0IjoxNzc2NzUyNTk3LCJleHAiOjE3NzY3NTYxOTd9.b2eziqafXn865Z78MHt89hUbRLEQ5Of7z4gvTyzW5lQ
+
+# ─────────────────────────────────────────────────────────────
+# 7. JWK HEADER INJECTION
+# Attacker-controlled public key embedded in the jwk header parameter.
+# Expected: CRITICAL — JWK injection detected (CVE-2018-0114).
+# Module: jwk_injection.py
+# ─────────────────────────────────────────────────────────────
+[jwk_injection]
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImp3ayI6eyJrdHkiOiJSU0EiLCJuIjoieDhSOU1JT1FTdEp5RnFqZVBJUmFNTEYyZGV4aDFQanRpUFlJODRjQ3Q1NlNOY3NJajZYWVpKTVJFVGlLeTdUbkJFMjIzaU1ReDVpTV94SWs1R3poZFV3N3diQWxtYi1xTEtSTnRud2JCT0plcVVxeXIzbkdvZktINkowcnZlUXZNUnc4Zi1wSk92S1A2Ml80Mmc5STQya0JNeGRmS1loOWZ6cURwWURPM0ZocGl6U3ZpaFFaZHNRSWRlMTBTZnZLMVU0a2Flc2NrRGdJSXo4Rl9yRC1EbXVDRWp6QUxWWWpTSU9jRVhmNnQ4N3pWdS0xeGtGOFg3eW5LZDRHbld3QzRvcHRTODd2VFhMUExQT3lfTnlGeGpUT3lQbjl1UVNYNDZmUExMSndPY2xyT2xCQ2IyZWI3cTNVSlNjTGNwOGZianc3R3BMNEhQY2VkbTdwRDhTRUxRIiwiZSI6IkFRQUIifX0.eyJzdWIiOiJhdHRhY2tlciIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3Njc1MjU5NywiZXhwIjoxNzc2NzU2MTk3fQ.g29qaXaPYBWPb6_QSidb0iJ-GMGme58z74pB2qusqGJWiOZFcSQL6a7huiH7zXu5vzT6IMLL_VDz3967UU25Lga0uxnECe4HpMwJHpl3Ny5gGJAbjwrVmrg7lBLq8kALCWtfKlq4kc0DQdThgDyV5ym4zBMfDXRwq6_qGQncb8hRHiO_OmuCts_-4Kf6nb62o8cqufR1T19hIfJ7aKphyYRsmWwmzw_nNPo_EAAnbFrTcESYZCn5_bHV7YUHNjnXo-YUY5jXi8RtzStDhtxfX3fGxYp3wNwITVeoF6S4WoRYiS97zdJM1vd-Kog_SqaN9RTKnZ9lBDHLX0YNFZm-vA
+
+# ─────────────────────────────────────────────────────────────
+# 8. KID INJECTION
+# kid header parameter contains a path traversal sequence.
+# Expected: HIGH — path traversal pattern detected in kid parameter.
+# Module: kid_injection.py
+# ─────────────────────────────────────────────────────────────
+[kid_injection]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ii4uLy4uL2Rldi9udWxsIn0.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzY3NTI1OTcsImV4cCI6MTc3Njc1NjE5N30.okipNUEmZVrzx8a9o9JZvbEHHLjQRbAXU6JIAIOygYU
+
+# ─────────────────────────────────────────────────────────────
+# 9. LONG EXPIRY
+# exp set 10 years in the future.
+# Expected: LOW — excessively long token lifetime detected.
+# Module: claim_analyser.py
+# ─────────────────────────────────────────────────────────────
+[long_expiry]
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJpc3MiOiJqd2JyZWFrZXItdGVzdCIsImlhdCI6MTc3Njc1MjU5NywiZXhwIjoyMDkyMTEyNTk3fQ.MItb6sedjsq-lp8bkO9t6-qHRvtAZk5oG4jD130hVsM
+
+# ─────────────────────────────────────────────────────────────
+# 10. ALGORITHM CONFUSION CANDIDATE
+# Signed with RS256. Use with tests/alg_confusion_public.pem
+# to test the RS256->HS256 confusion attack.
+# Expected: HIGH — algorithm confusion attack viable.
+# Module: alg_confusion.py
+# Command: python jwbreaker.py -t <token> -k tests/alg_confusion_public.pem
+# ─────────────────────────────────────────────────────────────
+[alg_confusion]
+eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIiLCJpc3MiOiJqd2JyZWFrZXItdGVzdCIsImlhdCI6MTc3Njc1MjU5NywiZXhwIjoxNzc2NzU2MTk3fQ.gaVa0WkknDUDI9A428z05fIwAmLrhvnimyrSsmAKAUEWlbcZn7n0iOJmVpWYFtWortLQVdln__R4zLbkXUJkjtRbW7ZDiI-UPk6z9535ikCT54zJvnPEkEHMFurXxTSPFgM6936-Je0BQBSU47VxTQVH9p9fD8IkVHEf2qxANBJE_eGtZ952R-qM7fthTHqHgfbVplXErrsutpMLtnXvhw10LOnmMDkv6Ih1ZpwvZg-9oZ1ukJ-6352KKTon8OK32szj9S4Z8_38BCbt0v3C9nkK1mGuyzdUHhBGFujZHPx8kpdPtpQ4ZSHWieilFrNgli1RBQeie6GH2sJWSlockA
