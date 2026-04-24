@@ -1,0 +1,17 @@
+# docker-compose.yml for JWBreaker
+# allows running JWBreaker via docker-compose with volume mounting
+# so output files are written to the host machine
+
+services:
+  jwbreaker:
+    build: .
+    image: jwbreaker
+    # mount current directory into /data in the container
+    # this lets you pass in wordlists, key files, and token files
+    # and get report files back out on the host
+    volumes:
+      - .:/data
+    # override entrypoint to use /data paths
+    # example: docker-compose run jwbreaker -t <token> -w /data/wordlists/common_secrets.txt
+    entrypoint: ["python", "jwbreaker.py"]
+    command: ["--help"]

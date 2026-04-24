@@ -35,7 +35,7 @@ from modules.reporter import build_report, render_text, render_json, write_repor
 def build_parser():
     parser = argparse.ArgumentParser(
         prog='jwbreaker',
-        description='JWBreaker — JWT Security Auditing Tool',
+        description='JWBreaker - JWT Security Auditing Tool',
         epilog='Example: python jwbreaker.py -t <token> -w wordlists/common_secrets.txt --forge role=admin',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
