@@ -33,7 +33,7 @@ SEVERITY_ORDER = {
 }
 
 # fields from findings that shouldn't appear in plain-text output
-# (they're too long/complex - shown in JSON only)
+# (they're too long/complex - shown in json only)
 VERBOSE_FIELDS = {'forged_token', 'forged_tokens', 'jwk', 'kid', 'jku', 'x5u'}
 
 
@@ -126,7 +126,7 @@ def render_text(report, verbose=False):
 
     # header
     lines.append(sep)
-    lines.append("  JWBreaker — JWT Security Audit Report")
+    lines.append("  JWBreaker - JWT Security Audit Report")
     lines.append(sep)
     lines.append(f"  Timestamp : {report['meta']['timestamp']}")
     if report['meta']['elapsed']:
@@ -186,7 +186,7 @@ def render_text(report, verbose=False):
 
 
 def render_json(report):
-    # render a report as a pretty-printed JSON string.
+    # render a report as a pretty-printed json string.
     return json.dumps(report, indent=2, default=str)
 
 

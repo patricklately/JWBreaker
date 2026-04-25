@@ -2,7 +2,7 @@
 jwk_injection.py - jwk header injection detection
 
 detects the presence of attacker-controlled key material embedded
-directly in the JWT header (CVE-2018-0114).
+directly in the jwt header (CVE-2018-0114).
 
 two related attack vectors are checked:
     - jwk: an attacker embeds their own public key directly in the
@@ -10,8 +10,8 @@ two related attack vectors are checked:
       instead of their own trusted key, accepting any token the
       attacker signs with the matching private key.
 
-    - jku: the header contains a URL pointing to a jwk set. a 
-      vulnerable server fetches keys from this URL, which an attacker
+    - jku: the header contains a url pointing to a jwk set. a 
+      vulnerable server fetches keys from this url, which an attacker
       can point to a server they control.
 
 Author: Patrick Earley
@@ -21,7 +21,7 @@ Module: CMP320 Advanced Ethical Hacking
 
 def analyse(decoded):
     """
-    check the JWT header for JWK injection attack vectors.
+    check the jwt header for jwk injection attack vectors.
 
     arg in is the output of decoder.decode(). returns a list of
     finding dicts with severity, title, and description.
@@ -38,15 +38,15 @@ def analyse(decoded):
             kty = jwk.get('kty', 'unknown')
             findings.append({
                 'severity': 'CRITICAL',
-                'title': "JWK header injection detected (CVE-2018-0114)",
+                'title': "jwk header injection detected (CVE-2018-0114)",
                 'description': (
-                    f"The JWT header contains an embedded JWK public key "
+                    f"the jwt header contains an embedded jwk public key "
                     f"(kty: {kty}). Vulnerable implementations verify the "
                     f"token signature using this attacker-supplied key instead "
-                    f"of the server's trusted key. An attacker can generate "
-                    f"their own RSA key pair, embed the public key in the header, "
+                    f"of the server's trusted key. an attacker can generate "
+                    f"their own rsa key pair, embed the public key in the header, "
                     f"sign the token with their private key, and the server will "
-                    f"accept it as valid. This allows complete authentication bypass "
+                    f"accept it as valid. this allows complete authentication bypass "
                     f"and arbitrary claim forgery."
                 ),
                 'jwk': jwk
@@ -55,27 +55,27 @@ def analyse(decoded):
             # jwk is present but malformed
             findings.append({
                 'severity': 'HIGH',
-                'title': "Malformed JWK parameter in header",
+                'title': "malformed jwk parameter in header",
                 'description': (
-                    f"The JWT header contains a 'jwk' parameter but its value "
-                    f"is not a valid JSON object. This may indicate a failed "
+                    f"the jwt header contains a 'jwk' parameter but its value "
+                    f"is not a valid json object. this may indicate a failed "
                     f"injection attempt or a misconfigured implementation."
                 )
             })
 
-    # jku header parameter - remote JWK set url
+    # jku header parameter - remote jwk set url
     if 'jku' in header:
         jku = header['jku']
         findings.append({
             'severity': 'HIGH',
-            'title': "JKU header parameter present",
+            'title': "jku header parameter present",
             'description': (
-                f"The JWT header contains a 'jku' (JWK Set URL) parameter "
-                f"pointing to: '{jku}'. Vulnerable servers fetch verification "
-                f"keys from this URL at runtime. If an attacker can control "
-                f"this URL, they can point it to their own JWK set and have "
+                f"the jtw header contains a 'jku' (jwk set url) parameter "
+                f"pointing to: '{jku}'. vulnerable servers fetch verification "
+                f"keys from this url at runtime. if an attacker can control "
+                f"this url, they can point it to their own jwk set and have "
                 f"the server verify tokens with attacker-controlled keys. "
-                f"Servers should only accept JKU values from a strict allowlist."
+                f"servers should only accept JKU values from a strict allowlist."
             ),
             'jku': jku
         })
@@ -85,11 +85,11 @@ def analyse(decoded):
         x5u = header['x5u']
         findings.append({
             'severity': 'HIGH',
-            'title': "X5U header parameter present",
+            'title': "x5u header parameter present",
             'description': (
-                f"The JWT header contains an 'x5u' (X.509 URL) parameter "
-                f"pointing to: '{x5u}'. Similar to the JKU attack, a vulnerable "
-                f"server fetching certificates from this URL could be redirected "
+                f"the jwt header contains an 'x5u' (X.509 URL) parameter "
+                f"pointing to: '{x5u}'. similar to the jku attack, a vulnerable "
+                f"server fetching certificates from this url could be redirected "
                 f"to attacker-controlled certificate material."
             ),
             'x5u': x5u
@@ -99,10 +99,10 @@ def analyse(decoded):
     if 'x5c' in header:
         findings.append({
             'severity': 'MEDIUM',
-            'title': "X5C header parameter present",
+            'title': "x5c",
             'description': (
-                "The JWT header contains an 'x5c' (X.509 certificate chain) "
-                "parameter. Servers that blindly trust the certificate chain "
+                "the jwt header contains an 'x5c' (X.509 certificate chain) "
+                "parameter. servers that blindly trust the certificate chain "
                 "embedded here without validating against a trusted root are "
                 "vulnerable to certificate injection attacks."
             )
@@ -111,9 +111,9 @@ def analyse(decoded):
     if not findings:
         findings.append({
             'severity': 'INFO',
-            'title': "No JWK injection vectors detected",
+            'title': "no jwk injection vectors detected",
             'description': (
-                "The header contains no jwk, jku, x5u, or x5c parameters."
+                "the header contains no jwk, jku, x5u, or x5c parameters."
             )
         })
 

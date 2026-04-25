@@ -1,19 +1,19 @@
 """
-flask_target/app.py - intentionally vulnerable JWT target
+flask_target/app.py - intentionally vulnerable jwt target
 
 a deliberately insecure Flask application for testing JWBreaker.
 do NOT deploy this anywhere. it is intentionally vulnerable.
 
 vulnerabilities implemented:
-    - weak HMAC secret ('secret')
+    - weak hmac secret ('secret')
     - accepts alg:none tokens
     - no audience validation
     - accepts expired tokens
-    - sensitive data in JWT payload (email)
+    - sensitive data in jwt payload (email)
 
 endpoints:
-    POST /login         - issues a JWT for a given username
-    GET  /protected     - requires any valid JWT
+    POST /login         - issues a jwt for a given username
+    GET  /protected     - requires any valid jwt
     GET  /admin         - requires role=admin in the token
 
 usage:
@@ -44,7 +44,7 @@ USERS = {
 
 def decode_token(token):
     """
-    decode and verify a JWT token.
+    decode and verify a jwt token.
 
     intentionally vulnerable:
         - accepts alg:none (no algorithm enforcement)
@@ -92,10 +92,10 @@ def decode_token(token):
 @app.route('/login', methods=['POST'])
 def login():
     """
-    issue a JWT for a valid username/password combination.
+    issue a jwt for a valid username/password combination.
 
     vulnerability: email address included in the token payload
-    (sensitive data that shouldn't be in an unencrypted JWT).
+    (sensitive data that shouldn't be in an unencrypted jwt).
     """
     data = request.get_json(silent=True) or {}
     username = data.get('username', '')
@@ -108,7 +108,7 @@ def login():
     payload = {
         'sub':   username,
         'role':  user['role'],
-        'email': user['email'],        # vulnerability: PII in token
+        'email': user['email'],        # vulnerability: pii in token
         'iat':   datetime.datetime.utcnow(),
         'exp':   datetime.datetime.utcnow() + datetime.timedelta(hours=1),
     }
@@ -119,18 +119,17 @@ def login():
 
 @app.route('/protected', methods=['GET'])
 def protected():
-    """
-    returns a welcome message for any valid JWT holder.
-    """
-    auth_header = request.headers.get('Authorization', '')
+    # returns a welcome message for any valid jwt holder.
+    
+    auth_header = request.headers.get('Authorisation', '')
     if not auth_header.startswith('Bearer '):
-        return jsonify({'error': 'Missing or invalid Authorization header'}), 401
+        return jsonify({'error': 'missing or invalid Authorisation header'}), 401
 
     token = auth_header[len('Bearer '):]
     decoded, error = decode_token(token)
 
     if error:
-        return jsonify({'error': f'Token rejected: {error}'}), 401
+        return jsonify({'error': f'token rejected: {error}'}), 401
 
     return jsonify({
         'message': f"Welcome, {decoded.get('sub', 'unknown')}!",
@@ -141,24 +140,23 @@ def protected():
 
 @app.route('/admin', methods=['GET'])
 def admin():
-    """
-    returns admin panel access for tokens with role=admin.
-    """
-    auth_header = request.headers.get('Authorization', '')
+    # returns admin panel access for tokens with role=admin.
+    
+    auth_header = request.headers.get('Authorisation', '')
     if not auth_header.startswith('Bearer '):
-        return jsonify({'error': 'Missing or invalid Authorization header'}), 401
+        return jsonify({'error': 'missing or invalid Authorisation header'}), 401
 
     token = auth_header[len('Bearer '):]
     decoded, error = decode_token(token)
 
     if error:
-        return jsonify({'error': f'Token rejected: {error}'}), 401
+        return jsonify({'error': f'token rejected: {error}'}), 401
 
     if decoded.get('role') != 'admin': 
-        return jsonify({'error': 'Access denied - admin role required'}), 403
+        return jsonify({'error': 'access denied - admin role required'}), 403
 
     return jsonify({
-        'message': 'Admin panel access granted',
+        'message': 'admin panel access granted',
         'user':    decoded.get('sub', 'unknown'),
         'role':    decoded.get('role'),
     }), 200
@@ -171,8 +169,8 @@ def index():
         'warning':   'intentionally vulnerable - do not deploy',
         'endpoints': {
             'POST /login':     'get a JWT (body: {"username": "alice", "password": "password123"})',
-            'GET /protected':  'access with any valid JWT (Authorization: Bearer <token>)',
-            'GET /admin':      'access with role=admin JWT (Authorization: Bearer <token>)',
+            'GET /protected':  'access with any valid JWT (Authorisation: Bearer <token>)',
+            'GET /admin':      'access with role=admin JWT (Authorisation: Bearer <token>)',
         }
     }), 200
 

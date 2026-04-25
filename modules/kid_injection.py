@@ -59,8 +59,8 @@ def analyse(decoded):
     if 'kid' not in header:
         findings.append({
             'severity': 'INFO',
-            'title': "No kid parameter present",
-            'description': "The header does not contain a 'kid' parameter."
+            'title': "no kid parameter present",
+            'description': "the header does not contain a 'kid' parameter."
         })
         return findings
 
@@ -75,12 +75,12 @@ def analyse(decoded):
             'severity': 'HIGH',
             'title': "Path traversal pattern in kid parameter",
             'description': (
-                f"The kid value '{kid}' contains path traversal sequences. "
-                f"If the server uses this value to locate a key file without "
+                f"the kid value '{kid}' contains path traversal sequences. "
+                f"if the server uses this value to locate a key file without "
                 f"sanitisation, an attacker may be able to point it to an "
                 f"arbitrary file (e.g. /dev/null gives an empty key, making "
-                f"an empty-string HMAC trivially valid). "
-                f"Matched patterns: {', '.join(traversal_hits)}"
+                f"an empty-string hmac trivially valid). "
+                f"matched patterns: {', '.join(traversal_hits)}"
             ),
             'kid': kid
         })
@@ -92,13 +92,13 @@ def analyse(decoded):
     if sql_hits:
         findings.append({
             'severity': 'HIGH',
-            'title': "SQL injection pattern in kid parameter",
+            'title': "sql injection pattern in kid parameter",
             'description': (
-                f"The kid value '{kid}' contains patterns consistent with "
-                f"SQL injection. If the server uses this value unsanitised "
+                f"the kid value '{kid}' contains patterns consistent with "
+                f"sql injection. if the server uses this value unsanitised "
                 f"in a database query to look up signing keys, an attacker "
                 f"may be able to manipulate the query result. "
-                f"Matched patterns: {', '.join(sql_hits)}"
+                f"matched patterns: {', '.join(sql_hits)}"
             ),
             'kid': kid
         })
@@ -110,13 +110,13 @@ def analyse(decoded):
     if cmd_hits:
         findings.append({
             'severity': 'CRITICAL',
-            'title': "Command injection pattern in kid parameter",
+            'title': "command injection pattern in kid parameter",
             'description': (
-                f"The kid value '{kid}' contains shell metacharacters or "
-                f"command substitution syntax. If the server passes this value "
+                f"the kid value '{kid}' contains shell metacharacters or "
+                f"command substitution syntax. if the server passes this value "
                 f"to a shell command without sanitisation, arbitrary command "
                 f"execution may be possible. "
-                f"Matched patterns: {', '.join(cmd_hits)}"
+                f"matched patterns: {', '.join(cmd_hits)}"
             ),
             'kid': kid
         })
@@ -127,8 +127,8 @@ def analyse(decoded):
             'severity': 'INFO',
             'title': f"kid parameter present: '{kid}'",
             'description': (
-                f"The header contains a kid parameter with value '{kid}'. "
-                f"No injection patterns were detected, but ensure the server "
+                f"the header contains a kid parameter with value '{kid}'. "
+                f"no injection patterns were detected, but ensure the server "
                 f"validates this value against a strict allowlist."
             ),
             'kid': kid

@@ -46,22 +46,22 @@ def _rate(entropy, secret_length):
     entropy per character but still be weak overall, so we also
     penalise short secrets.
     """
-    # very short secrets are always at least HIGH severity
+    # very short secrets are always at least high severity
     if secret_length < 8:
         if entropy < 3.0:
-            return 'CRITICAL', "Extremely short and low-entropy secret"
-        return 'HIGH', "Very short secret - easy to brute-force regardless of entropy"
+            return 'CRITICAL', "extremely short and low-entropy secret"
+        return 'HIGH', "very short secret - easy to brute-force regardless of entropy"
 
     if entropy < 2.0:
-        return 'CRITICAL', "Trivially weak - near-zero entropy (e.g. repeated characters)"
+        return 'CRITICAL', "trivially weak - near-zero entropy (e.g. repeated characters)"
     elif entropy < 3.0:
-        return 'HIGH', "Very weak - low entropy, likely a common word or pattern"
+        return 'HIGH', "very weak - low entropy, likely a common word or pattern"
     elif entropy < 3.5:
-        return 'MEDIUM', "Weak - below recommended entropy for a signing secret"
+        return 'MEDIUM', "weak - below recommended entropy for a signing secret"
     elif entropy < 4.0:
-        return 'LOW', "Moderate entropy, but still recovered from a wordlist"
+        return 'LOW', "moderate entropy, but still recovered from a wordlist"
     else:
-        return 'INFO', "Reasonable entropy per character, but the secret was still cracked"
+        return 'INFO', "reasonable entropy per character, but the secret was still cracked"
 
 
 def analyse(cracked_secret):
@@ -75,18 +75,18 @@ def analyse(cracked_secret):
     if cracked_secret is None:
         return [{
             'severity': 'INFO',
-            'title': "Entropy analysis skipped",
-            'description': "No cracked secret was provided to analyse."
+            'title': "entropy analysis skipped",
+            'description': "no cracked secret was provided to analyse."
         }]
 
     # blank secret is a special case
     if cracked_secret == '':
         return [{
             'severity': 'CRITICAL',
-            'title': "Secret is blank - zero entropy",
+            'title': "secret is blank - zero entropy",
             'description': (
-                "The signing secret is an empty string, which has zero entropy. "
-                "This is the weakest possible secret."
+                "the signing secret is an empty string, which has zero entropy. "
+                "this is the weakest possible secret."
             ),
             'entropy': 0.0,
             'length': 0
@@ -97,13 +97,13 @@ def analyse(cracked_secret):
 
     return [{
         'severity': severity,
-        'title': f"Entropy analysis: {rating}",
+        'title': f"entropy analysis: {rating}",
         'description': (
-            f"The recovered secret '{cracked_secret}' has a Shannon entropy "
+            f"the recovered secret '{cracked_secret}' has a Shannon entropy "
             f"of {entropy:.2f} bits/character over {len(cracked_secret)} "
             f"character(s). {rating}. "
-            f"RFC 7518 requires HMAC keys to be at least as long as the hash "
-            f"output (32 bytes for HS256). A strong secret should be randomly "
+            f"rfc 7518 requires hmac keys to be at least as long as the hash "
+            f"output (32 bytes for hs256). A strong secret should be randomly "
             f"generated and at least 32 characters long."
         ),
         'entropy': round(entropy, 4),

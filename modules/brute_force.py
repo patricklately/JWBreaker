@@ -41,7 +41,7 @@ def _verify(signing_input, signature_bytes, secret, hash_fn):
     """
     attempt to verify a jwt signature using a candidate secret.
 
-    recomputes the HMAC signature using the signing input and
+    recomputes the hmac signature using the signing input and
     candidate secret, then compares against the actual signature
     using hmac.compare_digest to prevent timing attacks. returns 
     true if the secret is correct, false if it's not.
@@ -63,7 +63,7 @@ def _mutate(secret):
     """
     Generate common variations of a secret string.
 
-    Arg in is the secret, and returns a list of unique variants 
+    arg in is the secret, and returns a list of unique variants 
     (excluding the original since that will already have been tested).
     """
     variants = set()
@@ -100,7 +100,7 @@ def _load_wordlist(path):
 
     skips blank lines and lines starting with '#' (comments).
     
-    Arg in is the path to the wordlist file, and returns an empty list 
+    arg in is the path to the wordlist file, and returns an empty list 
     if the file doesn't exist or can't be read, instead of raising an 
     exception.
     """
@@ -141,9 +141,9 @@ def _try_batch(batch, signing_input, signature_bytes, hash_fn, use_mutations):
 
 def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
     """
-    attempt to brute-force the HMAC signing secret of a jwt.
+    attempt to brute-force the hmac signing secret of a jwt.
 
-    only runs against HMAC-signed tokens. skips gracefully for RSA/ECDSA 
+    only runs against hmac-signed tokens. skips gracefully for RSA/ECDSA 
     tokens with an informational finding explaining why.
 
     Args in are the output of decoder.decode(), optional path to a custom
@@ -155,13 +155,13 @@ def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
     findings = []
     algorithm = decoded['algorithm']
 
-    # only HMAC algorithms can be brute-forced offline
+    # only hmac algorithms can be brute-forced offline
     if algorithm not in ALGO_MAP:
         findings.append({
             'severity': 'INFO',
-            'title': f"Brute-force not applicable for {algorithm}",
+            'title': f"brute-force not applicable for {algorithm}",
             'description': (
-                f"{algorithm} uses asymmetric cryptography. The signing key "
+                f"{algorithm} uses asymmetric cryptography. the signing key "
                 f"is a private key that cannot be recovered by brute-force. "
                 f"Consider the algorithm confusion attack instead."
             )
@@ -176,10 +176,10 @@ def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
     if _verify(signing_input, signature_bytes, '', hash_fn):
         findings.append({
             'severity': 'CRITICAL',
-            'title': "Secret is blank",
+            'title': "secret is blank",
             'description': (
-                "The token is signed with an empty string as the secret. "
-                "This provides no security whatsoever — any attacker can "
+                "the token is signed with an empty string as the secret. "
+                "this provides no security whatsoever - any attacker can "
                 "forge arbitrary tokens trivially."
             ),
             'cracked_secret': ''
@@ -197,10 +197,10 @@ def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
         if not custom:
             findings.append({
                 'severity': 'INFO',
-                'title': "Custom wordlist could not be loaded",
+                'title': "custom wordlist could not be loaded",
                 'description': (
-                    f"The wordlist at '{wordlist_path}' could not be read "
-                    f"or was empty. Falling back to bundled secrets only."
+                    f"the wordlist at '{wordlist_path}' could not be read "
+                    f"or was empty. falling back to bundled secrets only."
                 )
             })
         else:
@@ -214,8 +214,8 @@ def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
     if not candidates:
         findings.append({
             'severity': 'INFO',
-            'title': "No candidates to test",
-            'description': "No wordlist was loaded and the bundled list is empty."
+            'title': "no candidates to test",
+            'description': "no wordlist was loaded and the bundled list is empty."
         })
         return findings
 
@@ -254,10 +254,10 @@ def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
     if cracked is not None:
         findings.append({
             'severity': 'CRITICAL',
-            'title': "HMAC secret cracked",
+            'title': "hmac secret cracked",
             'description': (
-                f"The signing secret was recovered from the wordlist. "
-                f"An attacker with this secret can forge arbitrary tokens "
+                f"the signing secret was recovered from the wordlist. "
+                f"an attacker with this secret can forge arbitrary tokens "
                 f"with any claims they choose, including privilege escalation."
             ),
             'cracked_secret': cracked
@@ -265,12 +265,12 @@ def analyse(decoded, wordlist_path=None, threads=4, use_mutations=True):
     else:
         findings.append({
             'severity': 'INFO',
-            'title': "Secret not found in wordlist",
+            'title': "secret not found in wordlist",
             'description': (
-                f"Tested {len(candidates)} candidate secret(s) "
+                f"tested {len(candidates)} candidate secret(s) "
                 f"({'with' if use_mutations else 'without'} mutations) "
-                f"across {threads} thread(s). The secret was not recovered. "
-                f"Try a larger wordlist or increase thread count."
+                f"across {threads} thread(s). the secret was not recovered. "
+                f"try a larger wordlist or increase thread count."
             )
         })
 

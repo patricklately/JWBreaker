@@ -29,21 +29,21 @@ SUSPICIOUS_VALUES = {'test', 'example', 'localhost', 'dev', 'development',
 
 
 def analyse(decoded):
-    # analyse the claims in a decoded JWT for security issues.
+    # analyse the claims in a decoded jwt for security issues.
     payload = decoded['payload']
     findings = []
     now = int(time.time())
 
-    # Missing critical claims
+    # missing critical claims
 
     for claim in CRITICAL_CLAIMS:
         if claim not in payload:
             findings.append({
                 'severity': 'MEDIUM',
-                'title': f"Missing claim: '{claim}'",
+                'title': f"missing claim: '{claim}'",
                 'description': (
-                    f"The '{claim}' claim is absent from the payload. "
-                    f"RFC 7519 strongly recommends this claim be present "
+                    f"the '{claim}' claim is absent from the payload. "
+                    f"rfc 7519 strongly recommends this claim be present "
                     f"to prevent token misuse."
                 )
             })
@@ -52,14 +52,14 @@ def analyse(decoded):
         if claim not in payload:
             findings.append({
                 'severity': 'LOW',
-                'title': f"Missing recommended claim: '{claim}'",
+                'title': f"missing recommended claim: '{claim}'",
                 'description': (
-                    f"The '{claim}' claim is absent. While not mandatory, "
+                    f"the '{claim}' claim is absent. while not mandatory, "
                     f"its absence reduces the precision of token validity checks."
                 )
             })
 
-    # Expiry checks
+    # expiry checks
 
     if 'exp' in payload:
         exp = payload['exp']
@@ -68,9 +68,9 @@ def analyse(decoded):
         if not isinstance(exp, (int, float)):
             findings.append({
                 'severity': 'MEDIUM',
-                'title': "Invalid 'exp' claim type",
+                'title': "invalid 'exp' claim type",
                 'description': (
-                    f"The 'exp' claim should be a numeric timestamp, "
+                    f"the 'exp' claim should be a numeric timestamp, "
                     f"but got {type(exp).__name__}."
                 )
             })
@@ -80,10 +80,10 @@ def analyse(decoded):
                 overdue_by = now - exp
                 findings.append({
                     'severity': 'MEDIUM',
-                    'title': "Token is expired",
+                    'title': "token is expired",
                     'description': (
-                        f"The token expired {_format_duration(overdue_by)} ago "
-                        f"(exp: {exp}, now: {now}). If a server is accepting "
+                        f"the token expired {_format_duration(overdue_by)} ago "
+                        f"(exp: {exp}, now: {now}). if a server is accepting "
                         f"this token, expiry validation is not being enforced."
                     )
                 })
@@ -94,45 +94,45 @@ def analyse(decoded):
                 if lifetime > MAX_LIFETIME_SECONDS:
                     findings.append({
                         'severity': 'LOW',
-                        'title': "Excessively long token lifetime",
+                        'title': "excessively long token lifetime",
                         'description': (
-                            f"Token lifetime is {_format_duration(lifetime)}, "
+                            f"token lifetime is {_format_duration(lifetime)}, "
                             f"which exceeds the recommended maximum of 24 hours. "
-                            f"Long-lived tokens increase the window of opportunity "
+                            f"long-lived tokens increase the window of opportunity "
                             f"for an attacker if a token is compromised."
                         )
                     })
 
-    # Not-before check
+    # not-before check
 
     if 'nbf' in payload:
         nbf = payload['nbf']
         if isinstance(nbf, (int, float)) and nbf > now:
             findings.append({
                 'severity': 'LOW',
-                'title': "Token not yet valid (nbf in the future)",
+                'title': "token not yet valid (nbf in the future)",
                 'description': (
-                    f"The 'nbf' (not before) claim is set to a future time "
-                    f"({nbf}). The token should not be accepted yet."
+                    f"the 'nbf' (not before) claim is set to a future time "
+                    f"({nbf}). the token should not be accepted yet."
                 )
             })
 
-    # Issuer checks
+    # issuer checks
 
     if 'iss' in payload:
         iss = str(payload['iss']).lower().strip()
         if iss in SUSPICIOUS_VALUES or not iss:
             findings.append({
                 'severity': 'LOW',
-                'title': "Suspicious or generic issuer value",
+                'title': "suspicious or generic issuer value",
                 'description': (
-                    f"The 'iss' claim is set to '{payload['iss']}', which "
-                    f"looks like a placeholder or default value. This suggests "
+                    f"the 'iss' claim is set to '{payload['iss']}', which "
+                    f"looks like a placeholder or default value. this suggests "
                     f"the issuer field may not be properly validated."
                 )
             })
 
-    # Audience checks
+    # audience checks
 
     if 'aud' in payload:
         aud = payload['aud']
@@ -142,28 +142,29 @@ def analyse(decoded):
             if str(val).lower().strip() in SUSPICIOUS_VALUES or not str(val).strip():
                 findings.append({
                     'severity': 'LOW',
-                    'title': "Suspicious or generic audience value",
+                    'title': "suspicious or generic audience value",
                     'description': (
-                        f"The 'aud' claim contains '{val}', which looks like "
-                        f"a placeholder. Proper audience validation restricts "
+                        f"the 'aud' claim contains '{val}', which looks like "
+                        f"a placeholder. proper audience validation restricts "
                         f"which services can accept this token."
                     )
                 })
                 break
 
-    # No issues found
+    # no issues found
 
     if not findings:
         findings.append({
             'severity': 'INFO',
-            'title': "Claims appear valid",
-            'description': "No claim-related issues were detected."
+            'title': "claims appear valid",
+            'description': "no claim-related issues were detected."
         })
 
     return findings
 
 
-# Helper
+# helper
+# god help me
 
 def _format_duration(seconds):
     """Convert a number of seconds into a readable string like '2 hours 30 minutes'."""

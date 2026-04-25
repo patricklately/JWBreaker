@@ -1,10 +1,10 @@
 """
-decoder.py - for JWT decoding and structural validation
+decoder.py - for jwt decoding and structural validation
 
-JWTs are made of three Base64URL-encoded segments separated by
+jwts are made of three base64url-encoded segments separated by
 full stops: <header>.<payload>.<signature>
 
-The header and payload are JSON objects. The signature is raw bytes.
+the header and payload are json objects. the signature is raw bytes.
 
 Author: Patrick Earley
 Module: CMP320 Advanced Ethical Hacking
@@ -17,8 +17,8 @@ import json
 # custom exceptions
 
 class JWTDecodeError(Exception):
-    """Raised when a JWT cannot be decoded due to structural or
-    formatting issues. Provides a human-readable message suitable
+    """raised when a JWT cannot be decoded due to structural or
+    formatting issues. provides a human-readable message suitable
     for display in the CLI and report output."""
     pass
 
@@ -27,14 +27,14 @@ class JWTDecodeError(Exception):
 
 def _pad(b64_string):
     """
-    Requires padding with '=' characters to make the length a 
+    requires padding with '=' characters to make the length a 
     multiple of 4. JWT drops this padding so here we must restore
     it before decoding.
 
-    In goes a Base64URL-encoded string without padding, 
+    in goes a Base64URL-encoded string without padding, 
     and out comes the same string with the correct padding restored.
     """
-    # Calculate how many padding characters are needed
+    # calculate how many padding characters are needed
     padding_needed = 4 - len(b64_string) % 4
     if padding_needed != 4:
         b64_string += '=' * padding_needed
@@ -43,39 +43,39 @@ def _pad(b64_string):
 
 def _decode_b64url(b64_string, label):
     """
-    Handles both standard Base64 and URL-safe Base64 which replaces
+    handles both standard base64 and url-safe base64 which replaces
     '+' with '-' and '/' with '_'.
 
-    Arguments in are the Base64URL segment to decode, and a
+    arguments in are the Base64URL segment to decode, and a
     human-readable label for error messages, and out is the
-    decoded raw bytes. Raises JWTDecodeError if the segment cannot
-    be Base64 decoded.
+    decoded raw bytes. Raises jwtdecodeerror if the segment cannot
+    be base64 decoded.
     """
     try:
         return base64.urlsafe_b64decode(_pad(b64_string))
     except Exception as e:
         raise JWTDecodeError(
-            f"Failed to Base64URL-decode the {label} segment: {e}"
+            f"failed to base64url-decode the {label} segment: {e}"
         )
 
 
 def _parse_json(raw_bytes, label):
     """
-    Parse raw bytes as a UTF-8 JSON object.
+    parse raw bytes as a utf-8 json object.
 
-    In args are the decoded bytes and a readable label, out is the
-    parsed JSON object. Raises JWTDecodeError if the bytes cannot
-    be decoded as UTF-8 or parsed as valid JSON
+    in args are the decoded bytes and a readable label, out is the
+    parsed json object. Raises jwtdecodererror if the bytes cannot
+    be decoded as utf-8 or parsed as valid json
     """
     try:
         return json.loads(raw_bytes.decode('utf-8'))
     except UnicodeDecodeError:
         raise JWTDecodeError(
-            f"The {label} segment is not valid UTF-8."
+            f"the {label} segment is not valid utf-8."
         )
     except json.JSONDecodeError as e:
         raise JWTDecodeError(
-            f"The {label} segment is not valid JSON: {e}"
+            f"the {label} segment is not valid json: {e}"
         )
 
 
@@ -83,65 +83,63 @@ def _parse_json(raw_bytes, label):
 
 def decode(token):
     """
-    Decode and validate a raw JWT string.
+    decode and validate a raw JWT string.
 
-    Splits the token into its three segments, Base64URL-decodes each,
-    and parses the header and payload as JSON. Returns a structured
-    dictionary containing all decoded components alongside metadata
-    useful for downstream attack and analysis modules.
+    splits the token into its three segments, base64url-decodes each,
+    and parses the header and payload as json.
 
-    Arg in is the raw JWT string to decode 
+    arg in is the raw JWT string to decode 
 
-    Args out is a dictionary with the following keys: raw (the
-    original token string), header (the decoded JOSE header), 
+    args out is a dictionary with the following keys: raw (the
+    original token string), header (the decoded jose header), 
     payload (the decoded claims payload), signature_b64 (the raw
-    Base64URL-encoded signature segment), signature_bytes,
+    base64url-encoded signature segment), signature_bytes,
     algorithm (the signing algorithm declared in the header), 
     token_type, signing_input (the raw 
     '<header_b64>.<payload_b64>' string used as the signing 
     input), and is_alg_none (true if the declared algorithm is
     none).
 
-    Raises JWTDecodeError is the token is malformed, not a string,
-    empty, wrong amount of segments, or has invalid Base64 or JSON
+    raises jwtdecodeerror is the token is malformed, not a string,
+    empty, wrong amount of segments, or has invalid base64 or json
     """
-    # Input validation
+    # input validation
     if not isinstance(token, str):
         raise JWTDecodeError(
-            f"Expected a string token, got {type(token).__name__}."
+            f"expected a string token, got {type(token).__name__}."
         )
 
     token = token.strip()
 
     if not token:
-        raise JWTDecodeError("Token is empty.")
+        raise JWTDecodeError("token is empty.")
 
-    # Split into segments
+    # split into segments
     parts = token.split('.')
 
     if len(parts) != 3:
         raise JWTDecodeError(
-            f"A JWT must have exactly 3 segments separated by full stops, or '.', "
+            f"a jwt must have exactly 3 segments separated by full stops, or '.', "
             f"but {len(parts)} segment(s) were found. "
-            f"This probably isn't a JWT."
+            f"this probably isn't a jwt."
         )
 
     header_b64, payload_b64, signature_b64 = parts
 
-    # Decode header and payload
+    # decode header and payload
     header_bytes  = _decode_b64url(header_b64,  'header')
     payload_bytes = _decode_b64url(payload_b64, 'payload')
 
     header  = _parse_json(header_bytes,  'header')
     payload = _parse_json(payload_bytes, 'payload')
 
-    # Validate header fields
+    # validate header fields
     if 'alg' not in header:
         raise JWTDecodeError(
-            "The JWT header is missing the required 'alg' field."
+            "the jwt header is missing the required 'alg' field."
         )
 
-    # Decode signature
+    # decode signature
     if signature_b64 == '':
         signature_bytes = b''
     else:
@@ -154,7 +152,7 @@ def decode(token):
 
     signing_input = f"{header_b64}.{payload_b64}"
 
-    # Return structured result
+    # return structured result
     return {
         'raw':            token,
         'header':         header,
@@ -170,25 +168,25 @@ def decode(token):
 
 def pretty_print(decoded):
     """
-    Print a human-readable summary of a decoded JWT to stdout.
+    print a human-readable summary of a decoded JWT to stdout.
 
-    Supposed to be used for use with the --verbose flag in the CLI. 
-    Displays the header and payload as indented JSON, the algorithm, 
+    supposed to be used for use with the --verbose flag in the CLI. 
+    displays the header and payload as indented json, the algorithm, 
     token type, and whether the signature is present.
 
-    Argument is the output of decode()
+    argument is the output of decode()
     """
-    print("\n── JWT Decoded ─────────────────────────────────────────")
-    print(f"  Algorithm  : {decoded['algorithm']}")
-    print(f"  Token Type : {decoded['token_type']}")
-    print(f"  Signature  : {'(empty — alg:none)' if decoded['is_alg_none'] else '(present)'}")
+    print("\n=== jwt Decoded =========================================")
+    print(f"  algorithm  : {decoded['algorithm']}")
+    print(f"  token Type : {decoded['token_type']}")
+    print(f"  signature  : {'(empty - alg:none)' if decoded['is_alg_none'] else '(present)'}")
 
-    print("\n  Header:")
+    print("\n  header:")
     for line in json.dumps(decoded['header'], indent=4).splitlines():
         print(f"    {line}")
 
-    print("\n  Payload:")
+    print("\n  payload:")
     for line in json.dumps(decoded['payload'], indent=4).splitlines():
         print(f"    {line}")
 
-    print("────────────────────────────────────────────────────────\n")
+    print("========================================================\n")

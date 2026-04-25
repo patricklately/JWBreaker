@@ -74,9 +74,9 @@ SENSITIVE_CLAIM_NAMES = {
  
 def analyse(decoded):
     """
-    Scan the JWT payload for sensitive data.
+    scan the jwt payload for sensitive data.
 
-    In arg of the output from decoder.decode() and returns a list of
+    in arg of the output from decoder.decode() and returns a list of
     finding dicts with severity, title, and description
     """
     payload = decoded['payload']
@@ -92,10 +92,10 @@ def analyse(decoded):
             unique = list(dict.fromkeys(matches))
             findings.append({
                 'severity': severity,
-                'title': f"Sensitive data detected: {label}",
+                'title': f"sensitive data detected: {label}",
                 'description': (
                     f"{len(unique)} instance(s) of {label.lower()} pattern found "
-                    f"in the payload. JWT payloads are not encrypted and can be "
+                    f"in the payload. jwt payloads are not encrypted and can be "
                     f"read by anyone who obtains the token. "
                     f"Found: {', '.join(str(m)[:40] for m in unique[:3])}"
                 )
@@ -106,19 +106,19 @@ def analyse(decoded):
         if claim_name.lower() in SENSITIVE_CLAIM_NAMES:
             findings.append({
                 'severity': 'HIGH',
-                'title': f"Sensitive claim name: '{claim_name}'",
+                'title': f"sensitive claim name: '{claim_name}'",
                 'description': (
-                    f"The payload contains a claim named '{claim_name}', which "
+                    f"the payload contains a claim named '{claim_name}', which "
                     f"suggests sensitive data may be stored directly in the token. "
-                    f"Sensitive values should never be placed in an unencrypted JWT payload."
+                    f"sensitive values should never be placed in an unencrypted jwt payload."
                 )
             })
  
     if not findings:
         findings.append({
             'severity': 'INFO',
-            'title': "No sensitive data detected",
-            'description': "No obvious sensitive data patterns were found in the payload."
+            'title': "no sensitive data detected",
+            'description': "no obvious sensitive data patterns were found in the payload."
         })
  
     return findings

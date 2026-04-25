@@ -1,7 +1,7 @@
 """
 jwbreaker.py - JWBreaker CLI entry point
 
-Main entry point for JWBreaker. Handles argument parsing,
+main entry point for JWBreaker. handles argument parsing,
 orchestrates module execution, and produces the final report.
 
 usage:
@@ -62,7 +62,7 @@ def build_parser():
     parser.add_argument(
         '-k', '--pubkey',
         metavar='PUBKEY',
-        help='path to RSA public key PEM file (for algorithm confusion attack)'
+        help='path to rsa public key pem file (for algorithm confusion attack)'
     )
 
     # forgery
@@ -128,13 +128,13 @@ def load_token(args):
             line = line.strip()
             if line and not line.startswith('#') and not line.startswith('['):
                 return line
-        print("[!] No token found in file.", file=sys.stderr)
+        print("[!] no token found in file.", file=sys.stderr)
         sys.exit(1)
     except FileNotFoundError:
-        print(f"[!] File not found: '{args.file}'", file=sys.stderr)
+        print(f"[!] file not found: '{args.file}'", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"[!] Failed to read file: {e}", file=sys.stderr)
+        print(f"[!] failed to read file: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -150,10 +150,10 @@ def load_batch_tokens(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
     except FileNotFoundError:
-        print(f"[!] File not found: '{file_path}'", file=sys.stderr)
+        print(f"[!] file not found: '{file_path}'", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"[!] Failed to read file: {e}", file=sys.stderr)
+        print(f"[!] failed to read file: {e}", file=sys.stderr)
         sys.exit(1)
 
     tokens = []
@@ -164,7 +164,7 @@ def load_batch_tokens(file_path):
         tokens.append(line)
 
     if not tokens:
-        print("[!] No tokens found in file.", file=sys.stderr)
+        print("[!] no tokens found in file.", file=sys.stderr)
         sys.exit(1)
 
     return tokens
@@ -185,7 +185,7 @@ def audit_token(token_str, args):
     try:
         decoded = decode(token_str)
     except JWTDecodeError as e:
-        print(f"[!] Failed to decode token: {e}", file=sys.stderr)
+        print(f"[!] failed to decode token: {e}", file=sys.stderr)
         return None
 
     if args.verbose:
@@ -232,7 +232,7 @@ def audit_token(token_str, args):
 
 
 # entry point
-# ABANDON HOPE ALL YE WHO ENTER HERE
+# ABANDON HOPE ALL YE WHO ENTER HERE FR
 
 def main():
     parser = build_parser()

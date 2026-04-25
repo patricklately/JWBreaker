@@ -83,13 +83,13 @@ def _parse_modifications(modifications):
 
     for mod in modifications:
         if '=' not in mod:
-            errors.append(f"Invalid modification '{mod}' - must be in key=value format")
+            errors.append(f"invalid modification '{mod}' - must be in key=value format")
             continue
         key, _, value = mod.partition('=')
         key = key.strip()
         value = value.strip()
         if not key:
-            errors.append(f"Empty key in modification '{mod}'")
+            errors.append(f"empty key in modification '{mod}'")
             continue
         parsed[key] = _parse_value(value)
 
@@ -98,9 +98,9 @@ def _parse_modifications(modifications):
 
 def forge(decoded, modifications, cracked_secret=None, use_alg_none=False):
     """
-    forge a new JWT with modified claims.
+    forge a new jwt with modified claims.
 
-    in args are the output of decoder.decode(), A list of 'key=value' 
+    in args are the output of decoder.decode(), a list of 'key=value' 
     strings to apply to payload, the recovered HMAC secret 
     (from brute_force.py), and use_alg_none, which if True, forge 
     an unsigned alg:none token instead
@@ -119,16 +119,16 @@ def forge(decoded, modifications, cracked_secret=None, use_alg_none=False):
     for error in errors:
         findings.append({
             'severity': 'INFO',
-            'title': "Modification parse error",
+            'title': "modification parse error",
             'description': error
         })
 
     if not mods and not errors:
         findings.append({
             'severity': 'INFO',
-            'title': "No modifications specified",
+            'title': "no modifications specified",
             'description': (
-                "No claim modifications were provided. Use --forge key=value "
+                "no claim modifications were provided. use --forge key=value "
                 "to specify claims to modify in the forged token."
             )
         })
@@ -148,10 +148,10 @@ def forge(decoded, modifications, cracked_secret=None, use_alg_none=False):
 
         findings.append({
             'severity': 'CRITICAL',
-            'title': "Token forged via alg:none",
+            'title': "token forged via alg:none",
             'description': (
-                f"A new unsigned token has been forged with the requested "
-                f"claim modifications. The signature has been stripped and "
+                f"a new unsigned token has been forged with the requested "
+                f"claim modifications. the signature has been stripped and "
                 f"the algorithm set to 'none'."
             ),
             'forged_token': forged_token,
@@ -160,7 +160,7 @@ def forge(decoded, modifications, cracked_secret=None, use_alg_none=False):
         })
         return findings
 
-    # MAC forgery with cracked secret
+    # mac forgery with cracked secret
 
     if cracked_secret is not None:
         # use the original algorithm if it's HMAC, otherwise default to HS256
@@ -183,10 +183,10 @@ def forge(decoded, modifications, cracked_secret=None, use_alg_none=False):
 
         findings.append({
             'severity': 'CRITICAL',
-            'title': f"Token forged with cracked secret",
+            'title': f"token forged with cracked secret",
             'description': (
-                f"A new {sign_algo}-signed token has been forged using the "
-                f"recovered secret '{cracked_secret}'. This token is "
+                f"a new {sign_algo}-signed token has been forged using the "
+                f"recovered secret '{cracked_secret}'. this token is "
                 f"cryptographically valid and will be accepted by any server "
                 f"using the same secret."
             ),
@@ -200,11 +200,11 @@ def forge(decoded, modifications, cracked_secret=None, use_alg_none=False):
 
     findings.append({
         'severity': 'INFO',
-        'title': "Cannot forge - no signing method available",
+        'title': "cannot forge - no signing method available",
         'description': (
-            "Token forgery requires either a cracked HMAC secret "
+            "token forgery requires either a cracked hmac secret "
             "(from brute_force.py) or alg:none mode (--forge with alg:none). "
-            "Run the brute-force attack first, or use --alg-none if the "
+            "run the brute-force attack first, or use --alg-none if the "
             "server accepts unsigned tokens."
         )
     })
